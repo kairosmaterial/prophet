@@ -1,0 +1,14 @@
+The model weights distributed via the releases of this repository (e.g.
+prophet-oame-mbd.pt) are licensed under the Creative Commons Attribution 4.0
+International License (CC-BY-4.0).
+
+Copyright (c) 2026 Kairos Materials
+
+You are free to share and adapt the weights for any purpose, including
+commercially, provided you give appropriate credit to Kairos Materials,
+provide a link to the license, and indicate if changes were made.
+
+Full license text: https://creativecommons.org/licenses/by/4.0/legalcode
+
+The source code in this repository is separately licensed under the MIT
+License; see the LICENSE file.
