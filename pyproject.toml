@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "prophet-mlip"
+version = "0.1.0"
+description = "Equivariant machine-learning interatomic potential by Kairos Materials"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Kairos Materials", email = "research@kairosmaterials.com" }]
+dependencies = [
+  "ase>=3.29",
+  "e3nn>=0.6",
+  "matscipy>=1.1",
+  "numpy",
+  "scipy",
+  "torch>=2.7",
+  "torch_geometric>=2.7",
+]
+
+[project.optional-dependencies]
+kernel = ["openequivariance>=0.6"]
+
+[tool.setuptools]
+packages = ["prophet"]
