@@ -100,3 +100,38 @@ class MagmomHead(nn.Module):
         odd = m0.unsqueeze(-1) * phi
         g = self.g(h)
         return (odd * g[:, : self.num_basis]).sum(-1) + m0 * g[:, self.num_basis]
+
+
+class MagmomHeadX(nn.Module):
+    def __init__(self, feat_dim: int = 256, num_basis: int = 16, m2_max: float = 64.0,
+                 hidden: int = 128, e_basis: int = 12, e_max: float = 1.0):
+        super().__init__()
+        self.num_basis = num_basis
+        self.register_buffer("m2_centers", torch.linspace(0.0, m2_max, num_basis))
+        self.m2_width = m2_max / (num_basis - 1) * 1.5
+        self.register_buffer("e_centers", torch.linspace(-e_max, e_max, e_basis))
+        self.e_width = 2 * e_max / (e_basis - 1) * 1.5
+        self.g = nn.Sequential(
+            nn.Linear(feat_dim + e_basis, hidden), nn.SiLU(),
+            nn.Linear(hidden, hidden), nn.SiLU(),
+            nn.Linear(hidden, num_basis + 1),
+        )
+
+    def forward(self, m0: torch.Tensor, h: torch.Tensor, e_site: torch.Tensor) -> torch.Tensor:
+        phi = torch.exp(-(((m0 ** 2).unsqueeze(-1) - self.m2_centers) / self.m2_width) ** 2)
+        odd = m0.unsqueeze(-1) * phi
+        eb = torch.exp(-(((e_site).unsqueeze(-1) - self.e_centers) / self.e_width) ** 2)
+        g = self.g(torch.cat([h, eb], dim=-1))
+        return (odd * g[:, : self.num_basis]).sum(-1) + m0 * g[:, self.num_basis]
+
+
+def features_ex(model, batch, m0):
+    cap = {}
+    handle = model.model.exchange.register_forward_hook(
+        lambda _m, _a, out: cap.__setitem__("e", out.detach())
+    )
+    try:
+        h = features(model, batch, m0)
+    finally:
+        handle.remove()
+    return h, cap["e"]

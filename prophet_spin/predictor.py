@@ -9,7 +9,7 @@ from ase.stress import full_3x3_to_voigt_6_stress
 
 from .adapter import ProphetSpin
 from .graph import Batch, Collator, sample_from_atoms
-from .heads import MagmomHead, features
+from .heads import MagmomHead, MagmomHeadX, features, features_ex
 from .runtime import SpinRuntime
 
 
@@ -21,7 +21,10 @@ def load_head_bundle(path: str):
     state = {k: v for k, v in payload["backbone"].items() if ".tp." not in k}
     backbone.load_state_dict(state, strict=False)
     backbone.eval()
-    head = MagmomHead()
+    if config.get("headx"):
+        head = MagmomHeadX(e_max=float(config.get("e_max", 1.0)))
+    else:
+        head = MagmomHead()
     head.load_state_dict(payload["head"])
     head.eval()
     lut = torch.full((119, 3), 0.1)
@@ -72,7 +75,11 @@ class MagmomPredictor(Calculator):
             m0 = m
         sample = sample_from_atoms(atoms, m0.cpu().numpy())
         batch = Batch(self.collator([sample])).to(self.dev)
-        pred = self.head(batch.magmoms, features(self.backbone, batch, batch.magmoms))
+        if isinstance(self.head, MagmomHeadX):
+            h, e_site = features_ex(self.backbone, batch, batch.magmoms)
+            pred = self.head(batch.magmoms, h, e_site)
+        else:
+            pred = self.head(batch.magmoms, features(self.backbone, batch, batch.magmoms))
         return pred.cpu().numpy()
 
     def calculate(self, atoms=None, properties=None, system_changes=all_changes):

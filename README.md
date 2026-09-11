@@ -84,7 +84,12 @@ print(atoms.get_magnetic_moments())
 
 Checkpoints are distributed via the releases of this repository (custom format:
 one-line JSON config header followed by the PyTorch state dict) and load via
-`prophet.load_model(path)` or directly through the calculators.
+`prophet.load_model(path)` or directly through the calculators:
+
+- `prophet-oame-mbd.pt` - Prophet-V1-MBD, the Matbench Discovery submission checkpoint
+- `prophet-v1-mag.pt` - Prophet-V1-Mag energy/forces/stress model E(R, M)
+- `prophet-v1-mag-head.pt` - Prophet-V1-Mag magnetic-moment prediction bundle
+  (backbone, moment head and per-element seed table in one file)
 
 ## License
 
