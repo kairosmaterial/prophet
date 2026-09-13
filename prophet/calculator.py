@@ -12,12 +12,16 @@ from .model import load_model, scatter
 class KairosCalculator(Calculator):
     implemented_properties = ["energy", "free_energy", "forces", "stress"]
 
-    def __init__(self, model_path, use_kernel=True, use_compile=False, **kwargs):
+    def __init__(self, model_path, use_kernel=True, use_compile=False, device=None,
+                 **kwargs):
         super().__init__(**kwargs)
         if use_kernel:
             assert torch.cuda.is_available(), "kernels require a CUDA device"
         self.model, config = load_model(Path(model_path), use_kernel=use_kernel)
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        if device is not None:
+            self.device = torch.device(device)
+        else:
+            self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model = self.model.to(self.device)
         self.model.eval()
         self.compile_state = False if use_compile and torch.cuda.is_available() else True
