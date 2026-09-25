@@ -153,11 +153,15 @@ The research-preview designation describes release status and support expectatio
 
 ## License
 
-Source code is released under the MIT License (see [LICENSE](LICENSE)). Model weights distributed with releases are licensed under CC-BY-4.0 (see [LICENSE-WEIGHTS](LICENSE-WEIGHTS)). The two licenses apply separately.
+Source code is released under the MIT License (see [LICENSE](LICENSE)). Model weights distributed with releases are licensed under CC-BY-4.0 (see [LICENSE-WEIGHTS](LICENSE-WEIGHTS)). The two licenses apply separately. Third-party code included here retains its original license (see [LICENSE-THIRD-PARTY](LICENSE-THIRD-PARTY)).
 
 ## Acknowledgements
 
-Portions of the network utilities are adapted from e3nn, fairchem (eSEN) and
+Portions of the model implementation are derived from
+[Nequix](https://github.com/atomicarchitects/nequix), used under the MIT
+License (see [LICENSE-THIRD-PARTY](LICENSE-THIRD-PARTY)).
+
+Other network utilities are adapted from e3nn, fairchem (eSEN) and
 pytorch_runstats.
 
 Copyright (c) 2026 Kairos Materials
