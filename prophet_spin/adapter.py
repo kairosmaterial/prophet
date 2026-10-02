@@ -1,3 +1,4 @@
+import importlib.util
 import io
 import json
 
@@ -89,10 +90,26 @@ class ProphetSpin(nn.Module):
         return out
 
 
-def load_spin_model(path: str) -> tuple[ProphetSpin, dict]:
+def resolve_kernel(config: dict, device="cuda", use_kernel=None) -> dict:
+    on_cuda = torch.device(device).type == "cuda"
+    if use_kernel is None:
+        use_kernel = (
+            bool(config.get("kernel", False))
+            and on_cuda
+            and importlib.util.find_spec("openequivariance") is not None
+        )
+    elif use_kernel and not on_cuda:
+        raise ValueError("use_kernel=True requires a CUDA device")
+    config = dict(config)
+    config["kernel"] = bool(use_kernel)
+    return config
+
+
+def load_spin_model(path: str, device="cuda", use_kernel=None) -> tuple[ProphetSpin, dict]:
     with open(path, "rb") as f:
         config = json.loads(f.readline().decode())
         state_dict = torch.load(io.BytesIO(f.read()), map_location="cpu")
+    config = resolve_kernel(config, device, use_kernel)
     model = ProphetSpin(config)
     state_dict = {k: v for k, v in state_dict.items() if ".tp." not in k}
     model.load_state_dict(state_dict, strict=False)

@@ -360,7 +360,6 @@ class TPConvolution(torch.nn.Module):
             ) / np.sqrt(self.avg_n_neighbors)
         else:
             messages = self.tp(messages[senders], sh, radial_message)
-            messages = messages * edge_envelope
             messages_agg = scatter(messages, receivers, dim=0, dim_size=features.size(0)) / np.sqrt(
                 self.avg_n_neighbors
             )

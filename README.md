@@ -98,6 +98,8 @@ print(atoms.get_stress())
 
 The magnetic state is read from ASE's standard initial-magnetic-moments channel. Collinear `(N,)` and non-collinear `(N, 3)` moment arrays are supported.
 
+`SpinCalculator` and `MagmomPredictor` use the CUDA tensor-product kernels on a CUDA device when `openequivariance` is installed and the pure e3nn path otherwise. Pass `use_kernel=True` or `use_kernel=False` to override.
+
 ### Magnetic-moment prediction
 
 This independent example uses the prediction bundle associated with Prophet-Spin. Seed moments encode the starting magnetic ordering.
@@ -150,6 +152,13 @@ The released checkpoints are intended for research and evaluation, not productio
 Users are responsible for independently validating predictions and simulation results for their intended research. Magnetic-moment predictions should likewise be assessed for the system of interest and should not be treated as a guarantee of finding the magnetic ground state.
 
 The research-preview designation describes release status and support expectations; it does not modify the licenses. Model weights remain available under CC-BY-4.0, including commercial use subject to the license terms, and the source code remains available under the MIT License. If a future release needs a different weight license or a transition arrangement, that change must be made in the license terms and reviewed separately; a README disclaimer cannot withdraw rights already granted under CC-BY-4.0.
+
+## Changelog
+
+### 1.0.1
+
+- Fixed the e3nn (non-kernel) tensor-product path of `prophet_spin`, which applied the radial cutoff envelope a second time and returned wrong energies, forces and stresses for `prophet-v1-mag.pt` whenever the CUDA kernels were not used. The kernel path, the released weights and the reported evaluation numbers are unaffected. Results obtained with `prophet_spin` 1.0.0 on CPU or with `kernel=False` should be recomputed.
+- `prophet_spin` now selects the tensor-product path from the device, so the CPU examples run without modification.
 
 ## License
 

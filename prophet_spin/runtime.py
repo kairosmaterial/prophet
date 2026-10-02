@@ -50,9 +50,9 @@ class PairHamiltonian:
 
 
 class SpinRuntime:
-    def __init__(self, model_path: str, device: str = "cuda"):
+    def __init__(self, model_path: str, device: str = "cuda", use_kernel=None):
         self.dev = torch.device(device)
-        self.model, self.config = load_spin_model(model_path)
+        self.model, self.config = load_spin_model(model_path, device=self.dev, use_kernel=use_kernel)
         self.model = self.model.to(self.dev)
         self.collator = Collator(cutoff=self.model.graph_cutoff)
 

@@ -16,9 +16,9 @@ def _atoms_magmoms(atoms):
 class SpinCalculator(Calculator):
     implemented_properties = ["energy", "free_energy", "forces", "stress"]
 
-    def __init__(self, model_path, device="cuda", **kwargs):
+    def __init__(self, model_path, device="cuda", use_kernel=None, **kwargs):
         super().__init__(**kwargs)
-        self.runtime = SpinRuntime(model_path, device=device)
+        self.runtime = SpinRuntime(model_path, device=device, use_kernel=use_kernel)
 
     def calculate(self, atoms=None, properties=None, system_changes=all_changes):
         Calculator.calculate(self, atoms)

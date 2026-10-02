@@ -7,16 +7,17 @@ from ase.calculators.calculator import Calculator, all_changes
 from ase.data import atomic_numbers
 from ase.stress import full_3x3_to_voigt_6_stress
 
-from .adapter import ProphetSpin
+from .adapter import ProphetSpin, resolve_kernel
 from .graph import Batch, Collator, sample_from_atoms
 from .heads import MagmomHead, MagmomHeadX, features, features_ex
 from .runtime import SpinRuntime
 
 
-def load_head_bundle(path: str):
+def load_head_bundle(path: str, device="cuda", use_kernel=None):
     with open(path, "rb") as f:
         config = json.loads(f.readline().decode())
         payload = torch.load(io.BytesIO(f.read()), map_location="cpu")
+    config = resolve_kernel(config, device, use_kernel)
     backbone = ProphetSpin(config)
     state = {k: v for k, v in payload["backbone"].items() if ".tp." not in k}
     backbone.load_state_dict(state, strict=False)
@@ -39,15 +40,17 @@ class MagmomPredictor(Calculator):
     implemented_properties = ["energy", "free_energy", "forces", "stress", "magmoms"]
 
     def __init__(self, model_path, head_path, device="cuda", seed_mode="lut",
-                 magnetic_threshold=0.5, **kwargs):
+                 magnetic_threshold=0.5, use_kernel=None, **kwargs):
         super().__init__(**kwargs)
         if seed_mode not in ("lut", "raw"):
             raise ValueError(f"seed_mode must be 'lut' or 'raw'; got {seed_mode!r}")
         self.seed_mode = seed_mode
         self.magnetic_threshold = float(magnetic_threshold)
-        self.runtime = SpinRuntime(model_path, device=device)
+        self.runtime = SpinRuntime(model_path, device=device, use_kernel=use_kernel)
         self.dev = self.runtime.dev
-        self.backbone, self.head, self.lut = load_head_bundle(head_path)
+        self.backbone, self.head, self.lut = load_head_bundle(
+            head_path, device=self.dev, use_kernel=use_kernel
+        )
         self.backbone = self.backbone.to(self.dev)
         self.head = self.head.to(self.dev)
         self.lut = self.lut.to(self.dev)
